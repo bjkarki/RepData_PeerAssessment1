@@ -1,6 +1,6 @@
 ---
-title: "Reproducible Research: Course Project 1"
-author: Bibek Karki
+title: 'Reproducible Research: Course Project 1'
+author: "Bibek Karki"
 date: "01/15/2017"
 output: html_document
 ---
@@ -11,12 +11,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This project makes use of [Activity Monitoring Data] (https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip) dataset. The data, which was collected using a personal activity monitoring device, includes number of steps taken at every 5 minute interval. The objective of the project is to explore the the walking behavior of related person using the dataset.
+This project makes use of [Activity Monitoring Data] (https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip) dataset which was collected using a personal activity monitoring device. The data includes number of steps taken at every 5 minute interval over a two month period (October - November, 2012). The objective of the project is to explore the the walking behavior of related person using the dataset.
 
 
 ## Loading and preprocessing the data
 
+The current directory is expected to be in **RepData_PeerAssessment1**, the [repository forked] (https://github.com/rdpeng/RepData_PeerAssessment1) for the project.
 
+```{r loadData}
+if(!file.exists("activity.csv")) {
+        unzip("activity.zip")
+}
+AMD <- read.csv("activity.csv")
+```
 
 ## What is mean total number of steps taken per day?
 
