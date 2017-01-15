@@ -11,13 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This project makes use of [Activity Monitoring Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip) dataset which was collected using a personal activity monitoring device. The data includes number of steps taken at every 5 minute interval over a two month period (October - November, 2012). The objective of the project is to explore the the walking behavior of related person using the dataset.
+This project makes use of [Activity Monitoring Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip) dataset which was collected using a personal activity monitoring device. The data includes number of steps taken at every 5 minute interval over a two month period (October - November, 2012). The objective of the project is to explore the the walking behavior of the person using the dataset.
 
 
 
 ## Loading and preprocessing the data
 
-The current directory is expected to be in **RepData_PeerAssessment1**, the [repository forked](https://github.com/rdpeng/RepData_PeerAssessment1) for the project.
+The current directory is expected to be in **RepData_PeerAssessment1**, which is the [repository forked](https://github.com/rdpeng/RepData_PeerAssessment1) for the project.
 
 ```{r loadData}
 # Loading the data
