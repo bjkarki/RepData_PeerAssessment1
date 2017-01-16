@@ -11,13 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This project makes use of [Activity Monitoring Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip) dataset which was collected using a personal activity monitoring device. The data includes number of steps taken at every 5 minute interval over a two month period (October - November, 2012). The objective of the project is to explore the the walking behavior of the person using the dataset.
+This project makes use of [Activity Monitoring Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip) dataset which was collected using a personal activity monitoring device. The data includes number of steps taken at every 5 minute interval over a two month period (October - November, 2012). The objective of the project is to explore the the walking behavior of the person from whom the dataset was obtained.
 
 
 
 ## Loading and preprocessing the data
 
-The current directory is expected to be in **RepData_PeerAssessment1**, which is the [repository forked](https://github.com/rdpeng/RepData_PeerAssessment1) for the project.
+The current directory during excecution of program is expected to be in **RepData_PeerAssessment1**, which is the [repository forked](https://github.com/rdpeng/RepData_PeerAssessment1) for the project.
 
 ```{r loadData}
 # Loading the data
@@ -28,9 +28,12 @@ if(!file.exists("activity.csv")) {
 if (!exists("AMD")) {
         AMD <- read.csv("activity.csv")
 }
+```
 
-# Preprocessing
+```{r loadPakage, message=FALSE}
+#  Loading required libraries
 library(ggplot2)
+library(dplyr)
 ```
 
 
@@ -39,13 +42,16 @@ library(ggplot2)
 
 **Step 1:** Calculate the total steps taken per day.
 
+```{r totalStepsPerDay}
+## total steps per day
+totalSteps <- aggregate(steps ~ date, data = AMD, FUN = sum)
+```
+
 **Step 2:** Plot the histogram distribution of total number of steps per day.
 
-```{r totalStepsPerDay}
-## Step 1
-totalSteps <- aggregate(steps ~ date, data = AMD, FUN = sum)
+```{r histogram1}
 
-## Step 2
+## Using ggplot to plot a histogram distribution
 ggplot(data = totalSteps, mapping = aes(steps)) +
         geom_histogram(bins = 9, col = "steelblue", fill = rgb(0.00,0.33,0.67)) + 
         labs(title = "Distribution of Total Steps per Day", x = "Steps/day", y = "Frequency") +
@@ -54,9 +60,14 @@ ggplot(data = totalSteps, mapping = aes(steps)) +
 
 **Step 3:** Calculate the mean and median steps per day
 
-```{r medianMean}
+```{r medianMean1}
 as.integer(mean(totalSteps$steps))
 as.integer(median(totalSteps$steps))
+```
+
+```{r removeVar1, echo = FALSE}
+## remove objects from memory
+rm(totalSteps)
 ```
 
 
@@ -65,20 +76,23 @@ as.integer(median(totalSteps$steps))
 
 **Step 1:** Calculate average number of steps for each time interval
 
+```{r averageStepsPerInterval}
+## average no. of steps for given time interval
+averageSteps <- aggregate(steps~interval,data = AMD, FUN = mean)
+```
+
 **Step 2:** Show the result in line plot
 
-```{r averageStepsPerInterval}
-## Step 1
-averageSteps <- aggregate(steps~interval,data = AMD, FUN = mean)
-
-## Step 2
+```{r linePlot1}
+## lineplot of a average no. of steps as a function of Interval steps
 ggplot(data = averageSteps, mapping = aes(x = interval, y = steps)) +
         geom_line(lty = 1, col = rgb(0.00,0.33,0.67)) + 
-        labs(title = "Average Steps per Time Interval", x = "Time Interval", y = "Average Number of Steps") +
+        labs(title = "Average Steps per Time Interval", x = "Interval Steps of 5", y = "Average Number of Steps") +
         theme_bw(base_family = "Times")
 ```
 
-**Step 3:** Which 5-minute interval has the largest average steps
+**Step 3:** Identify 5-minute interval with the largest average steps
+
 ```{r maxAvgSteps}
 ## Step 3
 averageSteps$interval[which.max(averageSteps$steps)]
@@ -91,10 +105,100 @@ averageSteps$interval[which.max(averageSteps$steps)]
 **Step 1:** Calculate the total number of missing values
 
 ```{r missingValues}
-## Step 1
+## Total no. of missing values
 sum(is.na(AMD$steps))
+
+## Missing values: Percent of Total
+mean(is.na(AMD$steps))
 ```
 
+**Step 2:** To impute the missing data, **mean steps for the given 5 minute interval** is used. Moreover, the average steps for the interval is already available.
 
+***Step 3:*** With the imputing strategy, update the original data.
+
+```{r naRemovedData}
+## split clean and na data
+cleanData <- AMD[!is.na(AMD$steps),]
+naData <- AMD[is.na(AMD$steps),]
+
+## update NA data
+naUpdated <- merge(naData, averageSteps, by = "interval")
+naUpdated <- select(naUpdated,steps.y,date,interval)
+naUpdated <- rename(naUpdated, steps = steps.y)
+
+## Bind clean and uodated data to get data frame with na removed
+naRemovedData <- rbind(naUpdated, cleanData)
+naRemovedData <- naRemovedData[order(naRemovedData$date,naRemovedData$interval),]
+
+## Converting no. of steps to integer value
+naRemovedData$steps <- as.integer(naRemovedData$steps)
+```
+
+```{r removeVar3, echo = FALSE}
+## remove objects from memory
+rm(averageSteps, naData, cleanData, naUpdated)
+```
+
+**Step 4:** Plot the histogram distribution of total number of steps per day after imputing the missing data
+
+```{r totalStepsPerDay2}
+## total steps per day
+totalSteps <- aggregate(steps ~ date, data = naRemovedData, FUN = sum)
+
+## histogram plot
+ggplot(data = totalSteps, mapping = aes(steps)) +
+        geom_histogram(bins = 9, col = "steelblue", fill = rgb(0.00,0.33,0.67)) + 
+        labs(title = "Distribution of Total Steps per Day (NA's fixed)", x = "Steps/day", y = "Frequency") +
+        theme_bw(base_family = "Times")
+```
+
+**Step 5:** Calculate the mean and median steps per day. Report the differences in result when the missing data was not imputed.
+
+```{r medianMean2}
+as.integer(mean(totalSteps$steps))
+as.integer(median(totalSteps$steps))
+```
+
+* The mean total steps per day reduces only slightly after imputting the missing data. This is expected given that missing data from the original set was always for an entire day. This implies we were basically inputing average steps/day to the missing days.
+
+* The median drops by a fair amount compared to the mean. This is because the data that was missing previously is now tentatively mean steps per day, thus shifting the median to the left.
+
+```{r removeVar4, echo = FALSE}
+## remove objects from memory
+rm(totalSteps)
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+**Step 1:** Categorize the data by Weekdays and Weekends factor
+
+```{r weekdayWeekend}
+naRemovedData$days <- weekdays(as.Date(naRemovedData$date))
+naRemovedData$dayCategory <- ifelse(naRemovedData$days %in% c("Saturday", "Sunday"), "Weekends", "Weekdays")
+naRemovedData$dayCategory <- as.factor(naRemovedData$dayCategory)
+```
+**Step 2:** Average number of steps for each 5-minute interval categorized into Weekdays and Weekends
+
+```{r linePlot2}
+## Calculating average no. of steps
+meanStepsDays <- aggregate(steps ~ interval + dayCategory,data = naRemovedData, FUN = mean)
+
+## lineplot of a average no. of steps as a function of Interval steps
+ggplot(data = meanStepsDays, mapping = aes(x = interval, y = steps)) +
+        geom_line(lty = 1, col = rgb(0.00,0.33,0.67)) +
+        facet_grid(dayCategory ~ .) +
+        labs(title = "Average Steps during Weekdays and Weekends", x = "Interval Steps of 5", y = "Average Number of Steps") +
+        theme_bw(base_family = "Times")
+
+```
+
+```{r removeVar5, echo = FALSE}
+## remove objects from memory
+rm(meanStepsDays,naRemovedData,AMD)
+```
+
+Indeed, the average steps tends are different in weekends and weekdays. Steps are evenly spread throughout the day in Weekends, compared to only the morning steps spikes on Weekdays.
+
+
+
+
