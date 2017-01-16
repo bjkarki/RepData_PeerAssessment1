@@ -200,5 +200,3 @@ rm(meanStepsDays,naRemovedData,AMD)
 Indeed, the average steps tends are different in weekends and weekdays. Steps are evenly spread throughout the day in Weekends, compared to only the morning steps spikes on Weekdays.
 
 
-
-
