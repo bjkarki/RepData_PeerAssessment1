@@ -7,7 +7,7 @@ dataset which was collected using a personal activity monitoring device.
 The data includes number of steps taken at every 5 minute interval over
 a two month period (October - November, 2012). The objective of the
 project is to explore the the walking behavior of the person from whom
-the dataset is obtained.
+the dataset was obtained.
 
 Loading and preprocessing the data
 ----------------------------------
